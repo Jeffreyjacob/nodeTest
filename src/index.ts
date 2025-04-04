@@ -22,13 +22,14 @@ const startServer = async () => {
         resolvers: mergedResolver,
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
         introspection: true,
-        
+        csrfPrevention: false, 
+        cache: "bounded",
     })
 
     await server.start();
     app.use('/graphql',
         cors({
-            origin: 'https://nodetest-wgfx.onrender.com', 
+            origin: '*', 
             allowedHeaders: 'Content-Type, Authorization',
             credentials:true
         }),
@@ -39,7 +40,7 @@ const startServer = async () => {
         }),
     );
     app.get('/playground', playground({ endpoint: '/graphql' }));
-    
+
     await new Promise<void>(resolve => httpServer.listen({ port: PORT }, resolve));
     console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
     await ConnectDB()
