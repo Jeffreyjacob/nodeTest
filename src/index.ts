@@ -9,6 +9,7 @@ import { ConnectDB } from "./db/connect"
 import mergedTypeDefs from "./Schema/index";
 import playground from 'graphql-playground-middleware-express';
 import mergedResolver from "./resolvers/index";
+import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
 
 dotenv.config()
 
@@ -20,7 +21,14 @@ const startServer = async () => {
     const server = new ApolloServer({
         typeDefs: mergedTypeDefs,
         resolvers: mergedResolver,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer }),
+            process.env.NODE_ENV === 'production'
+            ? ApolloServerPluginLandingPageProductionDefault({
+                graphRef: 'my-graph-id@my-graph-variant',
+                footer: false,
+              })
+            : ApolloServerPluginLandingPageLocalDefault({ footer: false })
+        ],
         introspection: true,
         csrfPrevention: false, 
         cache: "bounded",
